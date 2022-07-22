@@ -53,10 +53,14 @@ func Verify(ctx context.Context, opts *VerifyOpts) (bool, error) {
 		return false, fmt.Errorf("couldn't create a new request: %w", err)
 	}
 
-	defer req.Body.Close()
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return false, fmt.Errorf("couldn't execute request: %w", err)
+	}
+	defer res.Body.Close()
 
 	var responseStruct VerifyResponse
-	err = json.NewDecoder(req.Body).Decode(&responseStruct)
+	err = json.NewDecoder(res.Body).Decode(&responseStruct)
 	if err != nil {
 		return false, fmt.Errorf("couldn't decode response from mCaptcha: %w", err)
 	}
