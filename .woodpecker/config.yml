@@ -1,0 +1,6 @@
+pipeline:
+  lint:
+    image: golang
+    commands:
+      - go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.47.0 run ./...
+      - go run github.com/mgechev/revive@v1.2.1 -config .revive.toml ./...

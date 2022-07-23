@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// VerifyOpts holds all the information that is need to make a verification request.
 type VerifyOpts struct {
 	Secret      string `json:"secret"`
 	Sitekey     string `json:"key"` //nolint:tagliatelle // `Sitekey` is the correct naming, but API expects `key`.
@@ -17,6 +18,8 @@ type VerifyOpts struct {
 	InstanceURL string `json:"-"`
 }
 
+// GetOpts returns a io.Reader that contains a JSON representation
+// of the options.
 func (opts *VerifyOpts) GetOpts() (io.Reader, error) {
 	if opts.Secret == "" {
 		return nil, ErrMissingSecret
@@ -36,10 +39,12 @@ func (opts *VerifyOpts) GetOpts() (io.Reader, error) {
 	return bytes.NewReader(body), nil
 }
 
-type VerifyResponse struct {
+type verifyResponse struct {
 	Valid bool `json:"valid"`
 }
 
+// Verify takes in a context and options to make a verification request.
+// It will verify if the given token is validated on the given mCaptcha instance.
 func Verify(ctx context.Context, opts *VerifyOpts) (bool, error) {
 	body, err := opts.GetOpts()
 	if err != nil {
@@ -66,7 +71,7 @@ func Verify(ctx context.Context, opts *VerifyOpts) (bool, error) {
 		return false, fmt.Errorf("mCaptcha didn't return 200 OK [content=%q]", string(content))
 	}
 
-	var responseStruct VerifyResponse
+	var responseStruct verifyResponse
 	err = json.NewDecoder(res.Body).Decode(&responseStruct)
 	if err != nil {
 		return false, fmt.Errorf("couldn't decode response from mCaptcha: %w", err)
